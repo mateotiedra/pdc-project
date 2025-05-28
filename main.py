@@ -18,7 +18,7 @@ def create_Mr(r):
 
 G = 10
 SIGMA2 = 10
-r = 5
+r = 11
 c_len = 2 ** (r + 1)  # c_len = 64
 Mr = create_Mr(r)  # (32, 32)
 Br = np.vstack((Mr, -Mr))  # (64, 32)
@@ -30,6 +30,8 @@ energy_per_codeword = c_len
 alpha = 2000 / (energy_per_codeword * MESS_LEN + 1e-9)  # Avoid division by zero
 scale = np.sqrt(alpha)
 codewords = scale * codewords
+
+THRES = 190.0  # THREShold for decoding
 
 
 ### Transmitter function ###
@@ -61,7 +63,8 @@ def channel(x: np.ndarray):
 
 ### Receiver function ###
 def receiver(y: np.ndarray):
-    decoded_indices = []
+    decoded_idx_1 = []
+    decoded_idx_2 = []
 
     for i in range(MESS_LEN):
         # Extract the received chunk for the i-th codeword
@@ -87,11 +90,20 @@ def receiver(y: np.ndarray):
             scores[j] = max(score_1, score_2)
 
         # Find the index of the maximum score
-        decoded_indices.append(np.argmax(scores))
+        decoded_idx_1.append(np.argmax(scores))
+
+        # Filter all elements that are greater than THRES
+        above_thres_idx = [score for _, score in enumerate(scores) if score > THRES]
+        if len(above_thres_idx) > 1:
+            decoded_idx_2.append(0)
+        else:
+            decoded_idx_2.append(np.argmax(scores))
 
     # Convert indices back to characters
-    decoded_message = "".join(ALPHABET[idx] for idx in decoded_indices)
-    return decoded_message
+    decoded_message_1 = "".join(ALPHABET[idx] for idx in decoded_idx_1)
+    decoded_message_2 = "".join(ALPHABET[idx] for idx in decoded_idx_2)
+
+    return [decoded_message_1, decoded_message_2]
 
 
 def calculate_similarity(original, decoded):
@@ -110,22 +122,27 @@ def calculate_similarity(original, decoded):
     matches = sum(1 for i in range(min_len) if original[i] == decoded[i])
 
     max_len = max(len(original), len(decoded))
-    similarity = (matches / max_len) * 40.0
+    similarity = matches / max_len
 
-    return str(similarity) + "/40"
+    return similarity
 
 
 if __name__ == "__main__":
-    plain_message = "Hello. this is a message of 40.0 chars.."
+
+    print(f"Testing with r = {r}")
+
     # Generate a random text message of 40 characters
     plain_message = "".join(random.choices(ALPHABET, k=MESS_LEN))
-    print("Text message: ", plain_message)
+    # print("Text message: ", plain_message)
 
     transmitted_message = transmitter(plain_message)
 
     received_message = channel(transmitted_message)
 
-    decoded_message = receiver(received_message)
+    decoded_messages = receiver(received_message)
 
-    print("Decoded message:  ", decoded_message)
-    print("Similarity:", calculate_similarity(plain_message, decoded_message))
+    # print("Decoded message 1:", decoded_messages[0])
+    print(
+        "Similarity :",
+        str(calculate_similarity(plain_message, decoded_messages[0]) * 40) + "/40",
+    )
