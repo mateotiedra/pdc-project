@@ -18,7 +18,7 @@ def create_Mr(r):
 
 G = 10
 SIGMA2 = 10
-r = 11
+r = 13
 c_len = 2 ** (r + 1)  # c_len = 64
 Mr = create_Mr(r)  # (32, 32)
 Br = np.vstack((Mr, -Mr))  # (64, 32)
