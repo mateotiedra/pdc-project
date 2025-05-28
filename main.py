@@ -19,10 +19,10 @@ def create_Mr(r):
 G = 10
 SIGMA2 = 10
 r = 13
-c_len = 2 ** (r + 1)  # c_len = 64
-Mr = create_Mr(r)  # (32, 32)
-Br = np.vstack((Mr, -Mr))  # (64, 32)
-codewords = np.hstack((Br, Br))  # (64, 64)
+c_len = 2 ** (r + 1) 
+Mr = create_Mr(r)  
+Br = np.vstack((Mr, -Mr))  
+codewords = np.hstack((Br, Br))
 
 # Scale the codewords to not have energy greater than 2000
 total_length = MESS_LEN * (2 * c_len)
@@ -37,8 +37,8 @@ THRES = 190.0  # THREShold for decoding
 ### Transmitter function ###
 def transmitter(i: str):
     assert len(i) == MESS_LEN
-    idx = np.array([ALPHABET.index(c) for c in i])  # (MESS_LEN,)
-    signal = codewords[idx].flatten()  # (MESS_LEN, 64) => (2560,)
+    idx = np.array([ALPHABET.index(c) for c in i]) 
+    signal = codewords[idx].flatten() 
     return signal
 
 
