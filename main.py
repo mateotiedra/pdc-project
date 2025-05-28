@@ -22,9 +22,9 @@ def create_Mr(r):
 G = 10
 SIGMA2 = 10
 r = 13
-c_len = 2 ** (r + 1) 
-Mr = create_Mr(r)  
-Br = np.vstack((Mr, -Mr))  
+c_len = 2 ** (r + 1)
+Mr = create_Mr(r)
+Br = np.vstack((Mr, -Mr))
 codewords = np.hstack((Br, Br))
 
 # Scale the codewords to not have energy greater than 2000
@@ -40,8 +40,8 @@ THRES = 190.0  # THREShold for decoding
 ### Transmitter function ###
 def transmitter(i: str):
     assert len(i) == MESS_LEN
-    idx = np.array([ALPHABET.index(c) for c in i]) 
-    signal = codewords[idx].flatten() 
+    idx = np.array([ALPHABET.index(c) for c in i])
+    signal = codewords[idx].flatten()
     return signal
 
 
@@ -156,7 +156,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     elif mode == "d":
-        with open("output.txt", "d") as f:
+        with open("output.txt", "r") as f:
             received_message = np.array([float(line.strip()) for line in f])
 
     elif mode == "t":
