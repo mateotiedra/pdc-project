@@ -1,5 +1,8 @@
 import random
 import numpy as np
+import sys
+from client import parse_args
+import argparse
 
 MESS_LEN = 40  # Length of the message to be transmitted
 ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ."
@@ -128,21 +131,46 @@ def calculate_similarity(original, decoded):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="COM-302 transmitter.",
+        formatter_class=argparse.RawTextHelpFormatter,
+        epilog="To promote efficient communication schemes, transmissions are limited to 1 Mega-sample.",
+    )
 
-    print(f"Testing with r = {r}")
+    parser.add_argument("--mode", type=str, required=True, help="Mode of operation.")
+    mode = (
+        parser.parse_args().mode or "t"
+    )  # MODE = "e" : encode, "d" : decode, "t" : test
 
     # Generate a random text message of 40 characters
-    plain_message = "".join(random.choices(ALPHABET, k=MESS_LEN))
-    # print("Text message: ", plain_message)
+    plain_message = "HelloWorld1234567890abcdefghijklmnopqrstuvwxyz"[:MESS_LEN]
 
     transmitted_message = transmitter(plain_message)
 
-    received_message = channel(transmitted_message)
+    if mode == "e":
+        # Save transmitted signal to input.txt, one component per line
+        with open("input.txt", "w") as f:
+            for x in transmitted_message:
+                f.write(f"{x}\n")
+        print("Transmitted message saved to input.txt")
+        sys.exit(0)
+
+    elif mode == "d":
+        with open("output.txt", "d") as f:
+            received_message = np.array([float(line.strip()) for line in f])
+
+    elif mode == "t":
+        received_message = channel(transmitted_message)
+
+    else:
+        raise ValueError(
+            "Invalid mode. Use 's' for save, 'r' for receive, or 't' for test."
+        )
 
     decoded_messages = receiver(received_message)
 
-    # print("Decoded message 1:", decoded_messages[0])
+    print("Decoded message 1:", decoded_messages[0])
     print(
         "Similarity :",
-        str(calculate_similarity(plain_message, decoded_messages[0]) * 40) + "/40",
+        str(int(calculate_similarity(plain_message, decoded_messages[0]) * 40)) + "/40",
     )
